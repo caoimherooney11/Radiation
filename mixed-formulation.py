@@ -13,7 +13,7 @@ scale = 0.5
 pythonToGeo(mesh_name, domain_dimensions, radius)
 mesh = Mesh("%s.msh" % mesh_name, dim=2)
 
-withIntegral = False
+withIntegral = True
 mms = True
 if withIntegral:
     Z = FunctionSpace(mesh, "CG", 1) * FunctionSpace(mesh, "R", 0)
@@ -38,30 +38,31 @@ sp = {
     "ksp_monitor": None
 }
 
-area = assemble(Constant(1) * ds(4, domain=mesh))
+area = assemble(Constant(1) * ds(4, domain=mesh)) 
 
 x, y = SpatialCoordinate(mesh)
 n = FacetNormal(mesh)
 
-out = File("/home/wechsung/Dropbox/temp/u.pvd")
+#out = File("/home/wechsung/Dropbox/temp/u.pvd")
+out = File("Output/u.pvd")
 if mms:
     uex = y
     f = -div(grad(uex))
     eps = Constant(1)
     if withIntegral:
-        g = uex**4 - inner(grad(uex), n) - assemble(eps * uex**4*ds(4))
+        g = -uex**4 - inner(grad(uex), n) + assemble(eps * uex**4*ds(4))
     else:
-        g = uex**4 - inner(grad(uex), n)
+        g = -uex**4 - inner(grad(uex), n)
     out.write(u_.interpolate(uex))
-    u_.assign(0)
+    u_.assign(0) 
 else:
-    f = Constant(0, domain=mesh)
+    f = Constant(0, domain=mesh) 
     g = Constant(0, domain=mesh)
 
 if withIntegral:
-    F = inner(grad(u), grad(v)) * dx - f*v*dx - (u**4 - lam - g)*v*ds(4) - (lam/area - u**4) * mu * ds(4)
+    F = inner(grad(u), grad(v)) * dx - f*v*dx + (u**4 - lam + g)*v*ds(4) + (lam/area - u**4) * mu * ds(4)
 else:
-    F = inner(grad(u), grad(v)) * dx - f*v*dx - (u**4 - g)*v*ds(4)
+    F = inner(grad(u), grad(v)) * dx - f*v*dx + (u**4 + g)*v*ds(4)
 
 solve(F == 0, z, bcs=bcs, solver_parameters=sp)
 out.write(u_)
