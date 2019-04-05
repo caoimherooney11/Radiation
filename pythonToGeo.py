@@ -41,10 +41,11 @@ def pythonToGeo(mesh_name, domain_dimensions, radius, holes_x, holes_y):#, holes
         f.write(" Delete; }")
         f.write("\n")
 
-        f.write("Physical Line(\"dirichlet1\") = {9};\n")
-        f.write("Physical Line(\"dirichlet2\") = {6};\n")
-        f.write("Physical Line(\"neumann\") = {8, 7};\n")
-        f.write("Physical Line(\"radiation\") = {5};\n")
+        for i in range(n):
+            f.write("Physical Line(\"radiation_%d\") = {%d};\n" % (i+1, i+5))
+        f.write("Physical Line(\"dirichlet1\") = {%d};\n" % (n+8))
+        f.write("Physical Line(\"dirichlet2\") = {%d};\n" % (n+5))
+        f.write("Physical Line(\"neumann\") = {%d, %d};\n" % (n+6, n+7))
         f.write("Physical Surface(\"Surf\") = {1};\n")
 
     else:
