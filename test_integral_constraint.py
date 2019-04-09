@@ -53,7 +53,7 @@ for j in range(4):
         "pc_fieldsplit_schur_factorization_type": "diag",
         "pc_fieldsplit_0_fields": "0",
         "pc_fieldsplit_1_fields": ",".join(["%i" % (i+1) for i in range(num_constraints)]),
-        "fieldsplit_0": {"ksp_type": "preonly","pc_type": "python", "pc_python_type": "firedrake.AssembledPC", "assembled_pc_type": "lu",},
+        "fieldsplit_0": {"ksp_type": "preonly","pc_type": "python", "pc_python_type": "firedrake.AssembledPC", "assembled_pc_type": "lu", "assembled_pc_factor_mat_solver_type": "mumps"},
         "fieldsplit_1": {"ksp_type": "preonly","pc_type": "none",},
     }
 
