@@ -7,15 +7,15 @@ from makeMesh import makeMesh
 
 # domain parameters
 mesh_name = "single_hole"
-domain_dimensions = [1.0, 2.0]# 1.0]
+domain_dimensions = [1.0, 1.0]# 1.0]
 dim = len(domain_dimensions)
 radius = 0.2  # size of void within
 scale = 0.5
 holes_x = 1
-holes_y = 2
+holes_y = 1
 num = holes_x * holes_y
 
-withIntegral = False
+withIntegral = True
 mms = True
 num_constraints = num
 norms = []
@@ -79,27 +79,27 @@ for i in range(4):
         area1 = assemble(Constant(1) * ds(1, domain=mesh)) 
         if num_constraints is 1:
             F = u * v * dx + k * inner(grad(u), grad(v)) * dx - f * v * dx + g * v * flux_bdys\
-               + (sigma * u - lam1 + g1) * v * ds(1) \
-               + (lam1/area1 - sigma * vf * u) * mu1 * ds(1) 
+               + (sigma * u - lam + g1) * v * ds(1) \
+               + (lam/area1 - sigma * vf * u) * mu * ds(1) 
         elif num_constraints is 2:
             area2 = assemble(Constant(1) * ds(2, domain=mesh)) 
             F = u * v * dx + k * inner(grad(u), grad(v)) * dx - f * v * dx + g * v * flux_bdys\
                + (sigma * u - lam1 + g1) * v * ds(1) + (sigma * u - lam2 + g2) * v * ds(2)\
                + (lam1/area1 - sigma * vf * u) * mu1 * ds(1) + (lam2/area2 - sigma * vf * u) * mu2 * ds(2) 
 
-            sp = {
-                "snes_monitor": None,
-                #"ksp_monitor": None,
-                "mat_type": "matfree",
-                "ksp_type": "gmres",
-                "pc_type": "fieldsplit",
-                "pc_fieldsplit_type": "schur",
-                "pc_fieldsplit_schur_factorization_type": "diag",
-                "pc_fieldsplit_0_fields": "0",
-                "pc_fieldsplit_1_fields": ",".join(["%i" % (i+1) for i in range(num_constraints)]),
-                "fieldsplit_0": {"ksp_type": "preonly","pc_type": "python", "pc_python_type": "firedrake.A    ssembledPC", "assembled_pc_type": "lu", "assembled_pc_factor_mat_solver_type": "mumps"},
-                "fieldsplit_1": {"ksp_type": "preonly","pc_type": "none",},
-                }
+        sp = {
+            "snes_monitor": None,
+            #"ksp_monitor": None,
+            "mat_type": "matfree",
+            "ksp_type": "gmres",
+            "pc_type": "fieldsplit",
+            "pc_fieldsplit_type": "schur",
+            "pc_fieldsplit_schur_factorization_type": "diag",
+            "pc_fieldsplit_0_fields": "0",
+            "pc_fieldsplit_1_fields": ",".join(["%i" % (i+1) for i in range(num_constraints)]),
+            "fieldsplit_0": {"ksp_type": "preonly","pc_type": "python", "pc_python_type": "firedrake.AssembledPC", "assembled_pc_type": "lu", "assembled_pc_factor_mat_solver_type": "mumps"},
+            "fieldsplit_1": {"ksp_type": "preonly","pc_type": "none",},
+            }
     else:
         if num_constraints is 1:
             inner_bdys = ds(1)
