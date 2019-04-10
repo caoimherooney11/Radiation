@@ -15,11 +15,11 @@ holes_x = 1
 holes_y = 2
 num = holes_x * holes_y
 
-withIntegral = False
+withIntegral = True
 mms = True
 num_constraints = num
 norms = []
-for i in range(4):
+for i in range(2):
     out = File("Output/u.pvd")
     scale = 2**(1-i)
     mesh = makeMesh(mesh_name, domain_dimensions, radius, holes_x, holes_y, scale)
