@@ -7,17 +7,17 @@ from makeMesh import makeMesh
 
 # domain parameters
 mesh_name = "single_hole"
-domain_dimensions = [1.0, 1.0]# 1.0]
+domain_dimensions = [1.0, 2.0]# 1.0]
 dim = len(domain_dimensions)
 radius = 0.2  # size of void within
 scale = 0.5
 holes_x = 1
-holes_y = 1
+holes_y = 2
 num = holes_x * holes_y
 
 withIntegral = False
 mms = True
-num_constraints = 1
+num_constraints = num
 norms = []
 for i in range(4):
     out = File("Output/u.pvd")
@@ -57,7 +57,7 @@ for i in range(4):
     sigma = 1.
     
     if mms:
-        uex = y**2
+        uex = y**2 + x**2
         out.write(u_.interpolate(uex))
         u_.assign(0) 
         f = uex - div(k * grad(uex))
