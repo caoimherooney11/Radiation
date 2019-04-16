@@ -6,7 +6,7 @@ from math import pi
 from makeMesh import makeMesh
 
 # domain parameters
-mesh_name = "single_hole"
+mesh_name = "holes_mesh"
 domain_dimensions = [1.0, 2.0]# 1.0]
 dim = len(domain_dimensions)
 radius = 0.2  # size of void within
@@ -15,6 +15,7 @@ holes_x = 1
 holes_y = 2
 num = holes_x * holes_y
 
+xx = 4 # exponent of nonlinearity ie u**xx
 withIntegral = True
 mms = True
 num_constraints = num
@@ -60,17 +61,18 @@ for i in range(2):
         uex = y**2 + x**2
         out.write(u_.interpolate(uex))
         u_.assign(0) 
+        #u_.interpolate(uex)
         f = uex - div(k * grad(uex))
         g = -inner(grad(uex), n)
     
         if withIntegral:
             if num_constraints is 1:
-                g1 = - k * inner(grad(uex), n) - sigma * uex**4 + sigma * vf * assemble(uex**4*ds(1))
+                g1 = - k * inner(grad(uex), n) - sigma * uex**xx + sigma * vf * assemble(uex**xx*ds(1))
             elif num_constraints is 2:
-                g1 = - k * inner(grad(uex), n) - sigma * uex**4 + sigma * vf * assemble(uex**4*ds(1))
-                g2 = - k * inner(grad(uex), n) - sigma * uex**4 + sigma * vf * assemble(uex**4*ds(2))
+                g1 = - k * inner(grad(uex), n) - sigma * uex**xx + sigma * vf * assemble(uex**xx*ds(1))
+                g2 = - k * inner(grad(uex), n) - sigma * uex**xx + sigma * vf * assemble(uex**xx*ds(2))
         else:
-            g1 = - k * inner(grad(uex), n) - sigma * uex**4
+            g1 = - k * inner(grad(uex), n) - sigma * uex**xx
     else:
         f = Constant(0, domain=mesh) 
         g = Constant(0, domain=mesh)
@@ -79,13 +81,12 @@ for i in range(2):
         area1 = assemble(Constant(1) * ds(1, domain=mesh)) 
         if num_constraints is 1:
             F = u * v * dx + k * inner(grad(u), grad(v)) * dx - f * v * dx + g * v * flux_bdys\
-               + (sigma * u**4 - lam + g1) * v * ds(1) \
-               + (lam/area1 - sigma * vf * u**4) * mu * ds(1) 
+               + (sigma * u**xx - lam + g1) * v * ds(1) + (lam/area1 - sigma * vf * u**xx) * mu * ds(1) 
         elif num_constraints is 2:
             area2 = assemble(Constant(1) * ds(2, domain=mesh)) 
             F = u * v * dx + k * inner(grad(u), grad(v)) * dx - f * v * dx + g * v * flux_bdys\
-               + (sigma * u**4 - lam1 + g1) * v * ds(1) + (sigma * u**4 - lam2 + g2) * v * ds(2)\
-               + (lam1/area1 - sigma * vf * u**4) * mu1 * ds(1) + (lam2/area2 - sigma * vf * u**4) * mu2 * ds(2) 
+               + (sigma * u**xx - lam1 + g1) * v * ds(1) + (lam1/area1 - sigma * vf * u**xx) * mu1 * ds(1)\
+               + (sigma * u**xx - lam2 + g2) * v * ds(2) + (lam2/area2 - sigma * vf * u**xx) * mu2 * ds(2) 
 
         sp = {
             "snes_monitor": None,
@@ -107,7 +108,7 @@ for i in range(2):
             inner_bdys = ds(1) + ds(2)
     
         F = u * v * dx + k * inner(grad(u), grad(v)) * dx - f * v * dx + g * v * flux_bdys\
-                + (sigma * u**4 + g1) * v * inner_bdys
+                + (sigma * u**xx + g1) * v * inner_bdys
         sp = {
                 "snes_monitor": None,
                 #"ksp_monitor": None,
