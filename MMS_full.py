@@ -1,17 +1,17 @@
 from firedrake import *
 from firedrake.petsc import PETSc
 import numpy as np
-from pythonToGeo import pythonToGeo
+from full_pythonToGeo import pythonToGeo
 from math import pi
 from makeMesh import makeMesh
 
 # domain parameters
 mesh_name = "holes_mesh"
-domain_dimensions = [1.0, 2.0]# 1.0]
+domain_dimensions = [2.0, 2.0]# 1.0]
 dim = len(domain_dimensions)
 radius = 0.2  # size of void within
 scale = 0.5
-holes_x = 1
+holes_x = 2
 holes_y = 2
 num = holes_x * holes_y
 
