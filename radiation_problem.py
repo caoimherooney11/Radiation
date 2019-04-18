@@ -139,14 +139,14 @@ while error > max_tol:
     uvec += stepsize * uu.vector()
     T_manual_output.write(u)
 
-    #print(error)
+    print(error)
     # error_list.append(error)
 
     diff = Function(V)
     diff.interpolate(u - u_exact)
     File("error.pvd").write(diff)
     error = abs(assemble(inner(diff, diff) * dx) ** 0.5 / assemble(inner(u, u) * dx) ** 0.5)
-    print(error)
+    #print(error)
 
 
 # print(error_list)
