@@ -3,7 +3,7 @@ from firedrake.petsc import PETSc
 import numpy as np
 from full_pythonToGeo import pythonToGeo
 from math import pi
-from makeMesh import makeMesh
+from makeFullMesh import makeMesh
 
 # domain parameters
 mesh_name = "holes_mesh"
