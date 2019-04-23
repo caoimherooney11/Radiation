@@ -17,6 +17,6 @@ def effectiveConductivity(Psi, k, T):
     for i in range(dim):
         for j in range(dim):
             rad_integral[i,j] = 4 * sigma * T**3 * assemble(X[i] * G(Psi[j] + X[j]) * ds(1, domain=mesh))
-            cond_integral[i,j] = k * assemble((Identity(2)[i,j] + grad(Psi)[i,j]) * dx)
+            cond_integral[i,j] = k(T) * assemble((Identity(2)[i,j] + grad(Psi)[i,j]) * dx)
 
     return (rad_integral, cond_integral)    

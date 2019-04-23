@@ -19,9 +19,9 @@ def solveCellProblem(mesh, radius, k, T):
     X  = SpatialCoordinate(mesh) 
     
     area = assemble(Constant(1) * ds(1, domain=mesh))
-    F = k * (inner(grad(u[0]), grad(v[0])) + inner(grad(u[1]), grad(v[1]))) * dx \
-            + (4 * sigma * T / k) * (u[0] + X[0] - lam0) * v[0] * ds(1) \
-            + (4 * sigma * T / k) * (u[1] + X[1] - lam1) * v[1] * ds(1) \
+    F = k(T) * (inner(grad(u[0]), grad(v[0])) + inner(grad(u[1]), grad(v[1]))) * dx \
+            + (4 * sigma * T / k(T)) * (u[0] + X[0] - lam0) * v[0] * ds(1) \
+            + (4 * sigma * T / k(T)) * (u[1] + X[1] - lam1) * v[1] * ds(1) \
             + (lam0/area - vf * (u[0] + X[0])) * mu0 * ds(1) \
             + (lam1/area - vf * (u[1] + X[1])) * mu1 * ds(1) \
             + inner(v, n) * ds(1) 

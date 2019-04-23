@@ -1,14 +1,16 @@
 from firedrake import *
 import numpy as np
+import matplotlib.pyplot as plt
 from radiation_cell_problem import solveCellProblem
 from effective_conductivity import effectiveConductivity
+from interpolate_keff import keff
 
 
 def generate_keff(mesh, radius, k):
-    length = 3 # set reasonable range of T values
+    length = 10 # set reasonable range of T values
     lists = [ [] for _ in range(5) ] 
     out = File("Output/Psi.pvd")
-    for T in np.linspace(0, 1, 3):
+    for T in np.linspace(0, 1, length):
         eps = 1e-10
         T = 1. * (T + eps)
         Psi = solveCellProblem(mesh, radius, k, T)
@@ -23,8 +25,11 @@ def generate_keff(mesh, radius, k):
                 l = l + 1
     
     lists_invert = list(map(list, zip(*lists)))
-    print(lists)
-    np.savetxt("Output/test.csv", lists_invert, delimiter=",")
+    np.savetxt("Output/BigDatasets/effective_conductivity.csv", lists_invert, delimiter=",")
+    
+    plt.plot(lists[0], lists[1], 'ro', lists[0], keff(lists[0], lists, 1), 'y')
+    plt.savefig("Output/effective_conductivity.png", bbox_inches="tight")
+
     return lists
 
 
