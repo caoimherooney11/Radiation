@@ -4,15 +4,18 @@ import numpy as np
 from cell_pythonToGeo import pythonToGeo
 from math import pi
 from makeCellMesh import makeCellMesh
+from makePeriodicMesh import getPeriodicMesh
 
 mms = True
 norms = []
 for i in range(4):
     mesh_name = "cell_mesh"
-    radius = 0.1
-    #hole_scale = 0.1; global_scale = 0.5
-    hole_scale = 2**(-i); global_scale = 2**(-i)
-    mesh = makeCellMesh(mesh_name, radius, hole_scale, global_scale)
+    radius = 0.25
+    #hole_scale = 2**(-i); global_scale = 2**(-i)
+    #mesh = makeCellMesh(mesh_name, radius, hole_scale, global_scale)
+    scale = 2**(-i)/10
+    print(scale)
+    mesh = getPeriodicMesh(mesh_name, scale)
     
     Z = VectorFunctionSpace(mesh, "CG", 1) * FunctionSpace(mesh, "R", 0) * FunctionSpace(mesh, "R", 0)
     V = Z.sub(0)
