@@ -7,7 +7,7 @@ from makePeriodicMesh import getPeriodicMesh
 
 mms = True
 norms = []
-for i in range(4):
+for i in range(3):
     mesh_name = "cell_mesh"
     radius = 0.25
     scale = 2**(-i)/10
@@ -23,9 +23,10 @@ for i in range(4):
     u_ = z.split()[0]
     n = FacetNormal(mesh)
     vf = 1. / (4 * pi * radius**2)
-    k = 1.
-    sigma = 1.
+    k = 5.
+    c = 4.
     T = 1.
+    tau = 1.
     
     X  = SpatialCoordinate(mesh) 
     if mms:
@@ -33,8 +34,8 @@ for i in range(4):
         uex = as_vector([cos(2 * pi * X[0])*cos(2 * pi * X[1]), sin(2 * pi * X[0])*sin(2 * pi * X[1])])
         out.write(u_.interpolate(uex))
         u_.assign(0)
-        f = - k * div(grad(uex))
-        g = - k * dot(grad(uex) + Identity(2), n) - 4 * sigma * T**3 * (uex + X \
+        f = - div(grad(uex))
+        g = - dot(grad(uex) + Identity(2), n) - (4 * c * (T + tau)**3 / k) * (uex + X \
                 - vf * as_vector([assemble((uex[0] + X[0]) * ds(1)), assemble((uex[1] + X[1]) * ds(1))]))
     else:
         out = File("Output/u.pvd")
@@ -43,9 +44,9 @@ for i in range(4):
     
     
     area = assemble(Constant(1) * ds(1, domain=mesh))
-    F = k * (inner(grad(u[0]), grad(v[0])) + inner(grad(u[1]), grad(v[1]))) * dx - inner(f, v) * dx\
-            + (4 * sigma * T / k) * (u[0] + X[0] - lam0) * v[0] * ds(1) \
-            + (4 * sigma * T / k) * (u[1] + X[1] - lam1) * v[1] * ds(1) \
+    F = (inner(grad(u[0]), grad(v[0])) + inner(grad(u[1]), grad(v[1]))) * dx - inner(f, v) * dx\
+            + (4 * c * (T + tau)**3 / k) * (u[0] + X[0] - lam0) * v[0] * ds(1) \
+            + (4 * c * (T + tau)**3 / k) * (u[1] + X[1] - lam1) * v[1] * ds(1) \
             + (lam0/area - vf * (u[0] + X[0])) * mu0 * ds(1) \
             + (lam1/area - vf * (u[1] + X[1])) * mu1 * ds(1) \
             + inner(v, n) * ds(1) \
