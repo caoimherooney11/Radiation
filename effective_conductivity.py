@@ -1,11 +1,11 @@
 from firedrake import *
 import numpy as np
 
-def effectiveConductivity(Psi, k, T):
-    sigma = 1.
+def effectiveConductivity(Psi, k, T, radius, tau, c, nonlinear):
     mesh = Psi.ufl_domain()
-    area = assemble(Constant(1.0) * ds(1, domain=mesh))
-    vf = 1 / area
+    length = assemble(Constant(1.0) * ds(1, domain=mesh))
+    vf = 1 / length
+    area = assemble(Constant(1.0) * dx(domain=mesh))
     dim = len(Psi)
     X = SpatialCoordinate(mesh)
 
@@ -14,9 +14,14 @@ def effectiveConductivity(Psi, k, T):
 
     rad_integral = np.zeros((dim, dim))
     cond_integral = np.zeros((dim, dim))
+
+    if nonlinear:
+        alpha = 4 * c * (T + tau)**3
+    else:
+        alpha = c
     for i in range(dim):
         for j in range(dim):
-            rad_integral[i,j] = 4 * sigma * T**3 * assemble(X[i] * G(Psi[j] + X[j]) * ds(1, domain=mesh))
-            cond_integral[i,j] = k(T) * assemble((Identity(2)[i,j] + grad(Psi)[i,j]) * dx)
+            rad_integral[i,j] = alpha * assemble(X[i] * G(Psi[j] + X[j]) * ds(1, domain=mesh)) / area
+            cond_integral[i,j] = k * assemble((Identity(2)[i,j] + grad(Psi)[i,j]) * dx) / area
 
     return (rad_integral, cond_integral)    
