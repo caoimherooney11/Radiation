@@ -46,7 +46,8 @@ for i in range(3):
     radius = radius*delta
     vf = 1. / (4 * pi * radius**2)
     k = 1. # problems arise for larger k. 
-    c = 1.
+    c = 1/delta
+    tau = delta**(1/3)
     
     if mms:
         uex = y**2 + x**2
@@ -61,14 +62,15 @@ for i in range(3):
         g = Constant(0, domain=mesh)
     
     for eps in [0.25, 0.5, 0.75, 1.0]:
-        xx = eps * 4
+        warning("eps = %f" % eps)
+        xx = Constant(eps * 4)
         F = u * v * dx + k * inner(grad(u), grad(v)) * dx - f * v * dx + g * v * flux_bdys
         for i in range(num):
-            g1 = - k * inner(grad(uex), n) - c * uex**xx + c * vf * assemble(uex**xx*ds(i+1))
+            g1 = - k * inner(grad(uex), n) - c * (uex+tau)**xx + c * vf * assemble((uex+tau)**xx*ds(i+1))
             area = assemble(Constant(1) * ds(i+1, domain=mesh))
 
-            F = F + (c * u**xx - lam[i+1] + g1) * v * ds(i+1)\
-                    + (lam[i+1]/area - c * vf * u**xx) * mu[i+1] * ds(i+1) 
+            F = F + (c * abs(u+tau)**xx - lam[i+1] + g1) * v * ds(i+1)\
+                    + (lam[i+1]/area - c * vf * abs(u+tau)**xx) * mu[i+1] * ds(i+1) 
 
         sp = {
             "snes_monitor": None,
