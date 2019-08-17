@@ -17,7 +17,7 @@ holes_y = int(domain_dimensions[1]/delta)
 num = holes_x * holes_y
 
 #xx = 1 # exponent of nonlinearity ie u**xx
-mms = True
+Dirichlet = True
 num_constraints = num
 norms = []
 for i in range(3):
@@ -39,7 +39,6 @@ for i in range(3):
     top_label = num+1
     bottom_label = num+2
     sides_label = num+3
-    flux_bdys = ds(top_label) + ds(bottom_label) + ds(sides_label)
     
     x, y = SpatialCoordinate(mesh)
     n = FacetNormal(mesh)
@@ -49,17 +48,18 @@ for i in range(3):
     c = 1/delta
     tau = delta**(1/3)
     
-    if mms:
-        uex = y**2 + x**2
-        out.write(u_.interpolate(uex))
-        u_.assign(0) 
-        #u_.interpolate(uex)
-        f = uex - div(k * grad(uex))
-        g = -inner(grad(uex), n)
-    
+    uex = y**2 + x**2
+    out.write(u_.interpolate(uex))
+    u_.assign(0) 
+    #u_.interpolate(uex)
+    f = uex - div(k * grad(uex))
+    g = -inner(grad(uex), n)
+    if Dirichlet:
+        bcs = [DirichletBC(V, uex, top_label), DirichletBC(V, uex, bottom_label)]
+        flux_bdys = ds(top_label) + ds(bottom_label) + ds(sides_label)
     else:
-        f = Constant(0, domain=mesh) 
-        g = Constant(0, domain=mesh)
+        bcs = None
+        flux_bdys = ds(top_label) + ds(bottom_label) + ds(sides_label)
     
     for eps in [0.25, 0.5, 0.75, 1.0]:
         warning("eps = %f" % eps)
@@ -87,13 +87,12 @@ for i in range(3):
             }
     
     
-        solve(F == 0, z, bcs=None, solver_parameters=sp)
+        solve(F == 0, z, bcs=bcs, solver_parameters=sp)
     out.write(u_)
         
-    if mms:
-        norm_ = norm(uex-u_)
-        norms.append(norm_)
-        #print(norm(uex-u_))
+    norm_ = norm(uex-u_)
+    norms.append(norm_)
+    #print(norm(uex-u_))
     
 ratios = []
 for i in range(len(norms) - 1):
