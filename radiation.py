@@ -8,6 +8,7 @@ from calculate_error import calculateError
 import time
 
 nonlinear = False
+MMS = False
 calculate_error = True
 generate_new_lists = False
 path = "HomogOutput/"
@@ -17,13 +18,13 @@ cell_scale = 0.1
 cell_mesh_name = "cell_mesh"
 direct_mesh_name = "full_mesh"
 
-BC = "Dirichlet" 
+BC = "Dirichlet"
 # BC = "Dirichlet"
 radius = 0.25 # O(delta)
 k = 1. # problems arise for larger k 
 c = 1. # using c in place of lambda in thesis
 stb = 5.67e-8
-L = 8
+L = 8.
 xi = 0.7
 Tmin = 300 # K
 def RHS(u):
@@ -83,7 +84,7 @@ direct_soln_times = []
 errors = []
 error_times = []
 i = 0   
-for delta in [0.1, 0.05]:
+for delta in [0.2, 0.1]:
     direct_out = File(path + "direct_%d.pvd" %i)
     error_out = File(path + "error_%d.pvd" %i)
     i = i+1
@@ -94,7 +95,7 @@ for delta in [0.1, 0.05]:
     T_ = (xi /(stb * delta * L)) ** (1/3)
     tau = Tmin/T_
 
-    (T_direct, direct_mesh_size, particle_mesh, direct_mesh_time, direct_soln_time, norm_) = solve_direct(direct_mesh_name, domain_dimensions, k, delta, radius, tau, c, direct_scale, BC, RHS, nonlinear)
+    (T_direct, direct_mesh_size, particle_mesh, direct_mesh_time, direct_soln_time, norm_) = solve_direct(direct_mesh_name, domain_dimensions, k, delta, radius, tau, c, direct_scale, BC, RHS, nonlinear, MMS)
     direct_out.write(T_direct)
     direct_mesh_sizes.append(direct_mesh_size)
     direct_particle_meshes.append(particle_mesh)

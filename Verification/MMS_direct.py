@@ -56,7 +56,7 @@ for i in range(3):
     g = -inner(grad(uex), n)
     if Dirichlet:
         bcs = [DirichletBC(V, uex, top_label), DirichletBC(V, uex, bottom_label)]
-        flux_bdys = ds(top_label) + ds(bottom_label) + ds(sides_label)
+        flux_bdys = ds(sides_label)
     else:
         bcs = None
         flux_bdys = ds(top_label) + ds(bottom_label) + ds(sides_label)

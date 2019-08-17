@@ -38,7 +38,7 @@ def generate_keff(mesh, radius, k, tau, c, nonlinear):
         (rad_integral, cond_integral) = effectiveConductivity(Psi, k, None, radius, None, c, nonlinear)
         integral = np.zeros((2,2))
         for i in range(2):
-            for i in range(2):
+            for j in range(2):
                integral[i, j] = rad_integral[i][j] + cond_integral[i][j]
         
         return integral

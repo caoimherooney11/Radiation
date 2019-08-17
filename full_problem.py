@@ -2,16 +2,19 @@ from firedrake import *
 import numpy as np
 from interpolate_keff import keff
 
-def solve_full(domain_dimensions, lists):
+def solve_full(domain_dimensions, lists, BC, f):
     nx = domain_dimensions[0] 
     ny = domain_dimensions[1]
     n = 10
-    mesh = RectangleMesh(10 * nx, 10 * ny, nx, ny)
+    mesh = RectangleMesh(200 * nx, 200 * ny, nx, ny)
+    x = SpatialCoordinate(mesh)
+
     
     P1 = FiniteElement("CG", mesh.ufl_cell(), 1)
     W = FunctionSpace(mesh, P1)
     V = TensorFunctionSpace(mesh, P1)
-    bcs = [DirichletBC(W, Constant(1.0), 4), DirichletBC(W, Constant(0.0), 3)] 
+    if BC is "Dirichlet":
+        bcs = [DirichletBC(W, Constant(1.0), 4), DirichletBC(W, Constant(0.0), 3)] 
     
     u = Function(W)
     v = TestFunction(W)
@@ -20,10 +23,14 @@ def solve_full(domain_dimensions, lists):
     k_eff = Function(V)
     dk_eff = Function(V)
     
-    F = inner(k_eff * grad(u), grad(v)) * dx
+    F = inner(k_eff * grad(u), grad(v)) * dx - f(x[0]) * v * dx
     J = inner(k_eff * grad(du), grad(v)) * dx \
             + inner(du * dk_eff * grad(u), grad(v)) * dx 
-    
+    if BC is "Neumann":
+        F = F + u * v * dx
+        J = J + du * v * dx 
+        bcs = None
+
     uvec = u.vector()
     max_iter = 3
     for i in range(max_iter):
@@ -39,10 +46,9 @@ def solve_full(domain_dimensions, lists):
     
         solve(J + F == 0, du, bcs, solver_parameters={"newton_solver":
                                         {"relative_tolerance": 1e-6}})
-        bcs = [DirichletBC(W, Constant(0.0), 4), DirichletBC(W, Constant(0.0), 3)] 
+        if BC is "Dirichlet":
+            bcs = [DirichletBC(W, Constant(0.0), 4), DirichletBC(W, Constant(0.0), 3)] 
         uvec += du.vector()
-    
-    File("Output/T.pvd").write(u)
     
     return (u)
 
