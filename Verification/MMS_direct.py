@@ -7,9 +7,9 @@ from makeFullMesh import makeMesh
 
 # domain parameters
 mesh_name = "holes_mesh"
-domain_dimensions = [0.2, 1.0]# 1.0]
+domain_dimensions = [0.2, 0.2]# 1.0]
 dim = len(domain_dimensions)
-radius = 0.2  # size of void within
+radius = 0.2  # O(delta)
 scale = 0.5
 delta = 0.1
 holes_x = int(domain_dimensions[0]/delta)
@@ -20,7 +20,7 @@ num = holes_x * holes_y
 mms = True
 num_constraints = num
 norms = []
-for i in range(4):
+for i in range(3):
     out = File("Output/u_%d.pvd" % i)
     scale = 2**(-i-1)
     mesh = makeMesh(mesh_name, domain_dimensions, delta, radius, scale)
@@ -43,9 +43,10 @@ for i in range(4):
     
     x, y = SpatialCoordinate(mesh)
     n = FacetNormal(mesh)
+    radius = radius*delta
     vf = 1. / (4 * pi * radius**2)
     k = 1. # problems arise for larger k. 
-    stb = 1.
+    c = 1.
     
     if mms:
         uex = y**2 + x**2
@@ -63,11 +64,11 @@ for i in range(4):
         xx = eps * 4
         F = u * v * dx + k * inner(grad(u), grad(v)) * dx - f * v * dx + g * v * flux_bdys
         for i in range(num):
-            g1 = - k * inner(grad(uex), n) - stb * uex**xx + stb * vf * assemble(uex**xx*ds(i+1))
+            g1 = - k * inner(grad(uex), n) - c * uex**xx + c * vf * assemble(uex**xx*ds(i+1))
             area = assemble(Constant(1) * ds(i+1, domain=mesh))
 
-            F = F + (stb * u**xx - lam[i+1] + g1) * v * ds(i+1)\
-                    + (lam[i+1]/area - stb * vf * u**xx) * mu[i+1] * ds(i+1) 
+            F = F + (c * u**xx - lam[i+1] + g1) * v * ds(i+1)\
+                    + (lam[i+1]/area - c * vf * u**xx) * mu[i+1] * ds(i+1) 
 
         sp = {
             "snes_monitor": None,
