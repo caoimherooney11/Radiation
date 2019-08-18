@@ -60,7 +60,6 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, scale, 
         if BC is "Dirichlet":
             bcs = [DirichletBC(V, Constant(1.0), top_label), DirichletBC(V, Constant(0.0), bottom_label)] 
             flux_bdys = ds(sides_label)
-            print(sides_label)
         else:
             bcs = None
             flux_bdys = ds(top_label) + ds(bottom_label) + ds(sides_label)
@@ -112,8 +111,8 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, scale, 
                 g1 = - k * inner(grad(uex), n) - (c/delta) * uex + (c/delta) * vf * assemble(uex * ds(i+1))
             else:
                 g1 = Constant(1e-10)
-            F = F + ( (c/delta) * u - lam[i+1] + g1) * v * ds(i+1)\
-                    + ( lam[i+1]/area - (c/delta) * vf * u ) * mu[i+1] * ds(i+1) 
+            F = F + ( (c/delta) * u - lam[i+1] + g1) * v * ds(i+1, domain=mesh)\
+                    + ( lam[i+1]/area - (c/delta) * vf * u ) * mu[i+1] * ds(i+1, domain=mesh) 
     
         sp = {
             "snes_monitor": None,

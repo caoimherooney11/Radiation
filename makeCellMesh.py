@@ -1,12 +1,11 @@
 from firedrake import *
-#from cell_pythonToGeo import pythonToGeo
 from radiation_pythonToGeo import pythonToGeo
-from torusToSquare import torusToSquare
 from subprocess import call
 from glueplex import make_periodic_mesh
 
-def makeCellMesh(mesh_name, radius, scale, global_scale):
+def makeCellMesh(mesh_name, radius, scale):
     pythonToGeo(mesh_name, radius, scale)
+    global_scale = 1.0
     call(["gmsh", "-%i" % 2, "%s.geo" % mesh_name, "-clscale", "%f" % global_scale, "-format", "msh2"]);
     mesh = Mesh("%s.msh" % mesh_name, dim=2, reorder=False)
 
