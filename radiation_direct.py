@@ -6,7 +6,7 @@ from math import pi
 from makeFullMesh import makeMesh
 import time
 
-def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, scale, BC, f, nonlinear, MMS):
+def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, VF, scale, BC, f, nonlinear, MMS):
     dim = len(domain_dimensions)
     holes_x = int(domain_dimensions[0]/delta)
     holes_y = int(domain_dimensions[1]/delta)
@@ -42,13 +42,14 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, scale, 
     
     n = FacetNormal(mesh)
     radius = radius*delta
-    vf = 1. / (4 * pi * radius**2)
+    vf = VF(radius)
+    #vf = 1. / (4 * pi * radius**2)
 
     if MMS:
-        #uex = x[0]**2 + x[1]**2
-        uex = x[1]
+        uex = x[0]**2 + x[1]**2
+        #uex = x[1]
         f = -div(k * grad(uex))
-        g = -inner(grad(uex), n)
+        g = - k * inner(grad(uex), n)
         if BC is "Dirichlet":
             bcs = [DirichletBC(V, uex, top_label), DirichletBC(V, uex, bottom_label)] 
             flux_bdys = ds(sides_label)
@@ -69,13 +70,13 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, scale, 
         if MMS:
             N = 11
         else:
-            N = 1000
-        eps_list = np.linspace(0.0, 1.0, N)
+            N = 10
+        eps_list = np.linspace(0.25, 1.0, N)
 
         for eps in eps_list:
             warning("solving for eps = %f" % eps)
             xx = Constant(eps * 4)
-            F = k * inner(grad(u), grad(v)) * dx - f(x[0]) * v * dx + g * v * flux_bdys
+            F = k * inner(grad(u), grad(v)) * dx - f(x[1]) * v * dx + g * v * flux_bdys
             for i in range(num):
                 area = assemble(Constant(1) * ds(i+1, domain=mesh))
                 #warning("area = %f" % area)
@@ -104,7 +105,7 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, scale, 
             solve(F == 0, z, bcs=bcs, solver_parameters=sp)
 
     else:
-        F = k * inner(grad(u), grad(v)) * dx - f(x[0]) * v * dx + g * v * flux_bdys
+        F = k * inner(grad(u), grad(v)) * dx - f(x[1]) * v * dx + g * v * flux_bdys
         for i in range(num):
             area = assemble(Constant(1) * ds(i+1, domain=mesh))
             if MMS:

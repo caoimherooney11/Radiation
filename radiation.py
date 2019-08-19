@@ -7,14 +7,14 @@ from radiation_direct import solve_direct
 from calculate_error import calculateError
 import time
 
-nonlinear = False
+nonlinear = True
 MMS = False
 calculate_error = True
-generate_new_lists = False
+generate_new_lists = True
 path = "HomogOutput/"
-domain_scale = 0.2
-domain_dimensions = [domain_scale*1.0, domain_scale*1.0]
-cell_scale = 0.1 
+domain_scale = 0.5
+domain_dimensions = [domain_scale*1.0, 1.0]
+cell_scale = 0.05 
 cell_mesh_name = "cell_mesh"
 direct_mesh_name = "full_mesh"
 
@@ -23,12 +23,23 @@ BC = "Dirichlet"
 radius = 0.25 # O(delta)
 k = 1. # problems arise for larger k 
 c = 1. # using c in place of lambda in thesis
-stb = 5.67e-8
-L = 8.
-xi = 0.7
+xi = 0.7; L = 8.; stb = 5.67e-8
 Tmin = 300 # K
-def RHS(u):
-    return 1e-10
+def vf(u):
+    return 1/(2 * pi * u)
+    #return 1/(4 * pi * u**2)
+
+
+delta_list = []
+cond_times = []
+homog_times = []
+homogenisation_times = []
+direct_mesh_sizes = []
+direct_particle_meshes = []
+direct_mesh_times = []
+direct_soln_times = []
+errors = []
+error_times = []
 
 warning("making cell mesh...")
 t0 = time.time()
@@ -39,63 +50,64 @@ warning("cell mesh made -- %f seconds" % cell_mesh_time)
 cell_mesh_size = cell_mesh.num_cells()
 warning("cell mesh size = %f" % cell_mesh_size)
 
-# generate effective conductivity 
-warning("generating effective conductivity...")
-t4 = time.time()
-if nonlinear:
-    if generate_new_lists:
-        lists = generate_keff(cell_mesh, radius, k, tau, c, nonlinear) # 1st: T, 2nd-5th: keff
-    else:
-        with open("Output/BigDatasets/effective_conductivity.csv", 'r') as f:
-            data = csv.reader(f, delimiter=",")
-            lists = [ [] for _ in range(5)]
-            for row in data:
-                for i in range(5):
-                    lists[i].append(float(row[i]))
-else:
-    effective_conductivity = generate_keff(cell_mesh, radius, k, None, c, nonlinear) 
-t5 = time.time()
-warning("effective conductivity generated")
-cond_time = t5-t4
-warning("time to generate conductivity = %f" % cond_time)
-
-
-# solve homogenised problem 
-t6 = time.time()
-warning("solving homogenised problem...")
-if nonlinear:
-    from full_problem import solve_full
-    T_homog = solve_full(domain_dimensions, lists, BC, RHS)
-else:
-    from linear_full_problem import solve_full
-    T_homog = solve_full(domain_dimensions, effective_conductivity, BC, RHS)
-
-t7 = time.time()
-homog_soln_time = t7-t6
-warning("homogenised problem solved -- %f seconds" % homog_soln_time)
-File(path + "homog.pvd").write(T_homog)
-
-# solve direct problem
-delta_list = []
-direct_mesh_sizes = []
-direct_particle_meshes = []
-direct_mesh_times = []
-direct_soln_times = []
-errors = []
-error_times = []
 i = 0   
-for delta in [0.2, 0.1]:
+for delta in [0.5, 0.25]:#, 0.125, 0.0625]:
+
+    def RHS(u):
+        return 1e-10#10**(3/8) * delta**(-3)
+    tau = 1e-10 #Tmin/(10**(8/3) * delta**(-1/3))
+    
+    # generate effective conductivity 
+    warning("generating effective conductivity...")
+    t4 = time.time()
+    data_name = "Output/BigDatasets/eff_cond_%d" %i
+    if nonlinear:
+        if generate_new_lists:
+            lists = generate_keff(data_name, cell_mesh, radius, k, tau, c, vf, nonlinear) # 1st: T, 2nd-5th: keff
+        else:
+            with open(data+name + ".csv", 'r') as f:
+                data = csv.reader(f, delimiter=",")
+                lists = [ [] for _ in range(5)]
+                for row in data:
+                    for i in range(5):
+                        lists[i].append(float(row[i]))
+    else:
+        effective_conductivity = generate_keff(data_name, cell_mesh, radius, k, None, c, vf, nonlinear) 
+    t5 = time.time()
+    warning("effective conductivity generated")
+    cond_time = t5-t4
+    warning("time to generate conductivity = %f" % cond_time)
+    cond_times.append(cond_time)
+    
+    
+    # solve homogenised problem 
+    t6 = time.time()
+    warning("solving homogenised problem...")
+    if nonlinear:
+        from full_problem import solve_full
+        T_homog = solve_full(domain_dimensions, lists, BC, RHS)
+    else:
+        from linear_full_problem import solve_full
+        T_homog = solve_full(domain_dimensions, effective_conductivity, BC, RHS)
+    
+    t7 = time.time()
+    homog_soln_time = t7-t6
+    warning("homogenised problem solved -- %f seconds" % homog_soln_time)
+    File(path + "homog_%d.pvd" % i).write(T_homog)
+    homog_times.append(homog_soln_time)
+    homogenisation_times.append(homog_soln_time + cond_time)
+    
+    # solve direct problem
     direct_out = File(path + "direct_%d.pvd" %i)
     error_out = File(path + "error_%d.pvd" %i)
-    i = i+1
 
     warning("solving for delta = %f" % delta)
     delta_list.append(delta)
-    direct_scale = delta
-    T_ = (xi /(stb * delta * L)) ** (1/3)
-    tau = Tmin/T_
+    direct_scale = 0.5*delta
+    #T_ = (xi /(stb * delta * L)) ** (1/3)
+    #tau = Tmin/T_
 
-    (T_direct, direct_mesh_size, particle_mesh, direct_mesh_time, direct_soln_time, norm_) = solve_direct(direct_mesh_name, domain_dimensions, k, delta, radius, tau, c, direct_scale, BC, RHS, nonlinear, MMS)
+    (T_direct, direct_mesh_size, particle_mesh, direct_mesh_time, direct_soln_time, norm_) = solve_direct(direct_mesh_name, domain_dimensions, k, delta, radius, tau, c, vf, direct_scale, BC, RHS, nonlinear, MMS)
     direct_out.write(T_direct)
     direct_mesh_sizes.append(direct_mesh_size)
     direct_particle_meshes.append(particle_mesh)
@@ -117,10 +129,13 @@ for delta in [0.2, 0.1]:
         errors.append(error)
         error_times.append(error_time)
 
+    i = i+1
+
 print("** PROBLEM SOLVED **")
 print("time to mesh cell problem = ", cell_mesh_time)
-print("time to generate effective conductivity = ", cond_time)
-print("time to solve homogenised problem = ", homog_soln_time)
+print("time to generate effective conductivity = ", cond_times)
+print("time to solve homogenised problem = ", homog_times)
+print("total homogenisation time = ", homogenisation_times)
 print("direct mesh size = ", direct_mesh_sizes)
 print("direct mesh size per particle = ", direct_particle_meshes)
 print("time to mesh direct problem = ", direct_mesh_times)

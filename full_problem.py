@@ -23,7 +23,7 @@ def solve_full(domain_dimensions, lists, BC, f):
     k_eff = Function(V)
     dk_eff = Function(V)
     
-    F = inner(k_eff * grad(u), grad(v)) * dx - f(x[0]) * v * dx
+    F = inner(k_eff * grad(u), grad(v)) * dx - f(x[1]) * v * dx
     J = inner(k_eff * grad(du), grad(v)) * dx \
             + inner(du * dk_eff * grad(u), grad(v)) * dx 
     if BC is "Neumann":

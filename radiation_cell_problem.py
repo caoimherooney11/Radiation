@@ -5,7 +5,7 @@ from cell_pythonToGeo import pythonToGeo
 from math import pi
 from makeCellMesh import makeCellMesh
 
-def solveCellProblem(mesh, radius, k, T, tau, c, nonlinear):
+def solveCellProblem(mesh, radius, k, T, tau, c, VF, nonlinear):
     Z = VectorFunctionSpace(mesh, "CG", 1) * FunctionSpace(mesh, "R", 0) * FunctionSpace(mesh, "R", 0)
     V = Z.sub(0)
     z = Function(Z, name = "solution")
@@ -13,7 +13,8 @@ def solveCellProblem(mesh, radius, k, T, tau, c, nonlinear):
     v, mu0, mu1 = TestFunctions(Z)
     u_ = z.split()[0]
     n = FacetNormal(mesh)
-    vf = 1. / (4 * pi * radius**2)
+    #vf = 1. / (4 * pi * radius**2)
+    vf = VF(radius)
     
     X  = SpatialCoordinate(mesh) 
     

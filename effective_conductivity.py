@@ -1,10 +1,11 @@
 from firedrake import *
 import numpy as np
 
-def effectiveConductivity(Psi, k, T, radius, tau, c, nonlinear):
+def effectiveConductivity(Psi, k, T, radius, tau, c, VF, nonlinear):
     mesh = Psi.ufl_domain()
     length = assemble(Constant(1.0) * ds(1, domain=mesh))
-    vf = 1 / length
+    #vf = 1 / length
+    vf = VF(radius)
     area = assemble(Constant(1.0) * dx(domain=mesh))
     dim = len(Psi)
     X = SpatialCoordinate(mesh)
