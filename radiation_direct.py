@@ -70,7 +70,7 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, VF, sca
         if MMS:
             N = 11
         else:
-            N = 10
+            N = 4
         eps_list = np.linspace(0.25, 1.0, N)
 
         for eps in eps_list:
@@ -79,7 +79,7 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, VF, sca
             F = k * inner(grad(u), grad(v)) * dx - f(x[1]) * v * dx + g * v * flux_bdys
             for i in range(num):
                 area = assemble(Constant(1) * ds(i+1, domain=mesh))
-                #warning("area = %f" % area)
+                warning("tau**3 = %f" % tau**3)
                 if MMS:
                     g1 = - k * inner(grad(uex), n) - (c/delta) * abs(uex + tau)**xx + (c/delta) * vf * assemble(abs(uex + tau)**xx * ds(i+1))
                 else:

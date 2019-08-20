@@ -13,22 +13,20 @@ calculate_error = True
 generate_new_lists = True
 path = "HomogOutput/"
 domain_scale = 0.5
-domain_dimensions = [domain_scale*1.0, 1.0]
-cell_scale = 0.05 
+domain_dimensions = [domain_scale*1.0, domain_scale*1.0]
+cell_scale = 0.1 
 cell_mesh_name = "cell_mesh"
 direct_mesh_name = "full_mesh"
 
 BC = "Dirichlet"
-# BC = "Dirichlet"
 radius = 0.25 # O(delta)
 k = 1. # problems arise for larger k 
 c = 1. # using c in place of lambda in thesis
 xi = 0.7; L = 8.; stb = 5.67e-8
-Tmin = 300 # K
+Tmin = 0#300 # K
 def vf(u):
     return 1/(2 * pi * u)
     #return 1/(4 * pi * u**2)
-
 
 delta_list = []
 cond_times = []
@@ -51,11 +49,16 @@ cell_mesh_size = cell_mesh.num_cells()
 warning("cell mesh size = %f" % cell_mesh_size)
 
 i = 0   
-for delta in [0.5, 0.25]:#, 0.125, 0.0625]:
+for delta in [0.5, 0.125]:#, 0.125, 0.0625]:
+    warning("solving for delta = %f" % delta)
+    delta_list.append(delta)
+    direct_scale = delta# * 0.25
 
     def RHS(u):
         return 1e-10#10**(3/8) * delta**(-3)
-    tau = 1e-10 #Tmin/(10**(8/3) * delta**(-1/3))
+    T_ = 10**(8/3) * delta**(-1/3)
+    tau = Tmin/T_
+    warning("tau = %f" % tau)
     
     # generate effective conductivity 
     warning("generating effective conductivity...")
@@ -100,12 +103,6 @@ for delta in [0.5, 0.25]:#, 0.125, 0.0625]:
     # solve direct problem
     direct_out = File(path + "direct_%d.pvd" %i)
     error_out = File(path + "error_%d.pvd" %i)
-
-    warning("solving for delta = %f" % delta)
-    delta_list.append(delta)
-    direct_scale = 0.5*delta
-    #T_ = (xi /(stb * delta * L)) ** (1/3)
-    #tau = Tmin/T_
 
     (T_direct, direct_mesh_size, particle_mesh, direct_mesh_time, direct_soln_time, norm_) = solve_direct(direct_mesh_name, domain_dimensions, k, delta, radius, tau, c, vf, direct_scale, BC, RHS, nonlinear, MMS)
     direct_out.write(T_direct)

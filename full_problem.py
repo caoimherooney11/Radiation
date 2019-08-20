@@ -6,7 +6,7 @@ def solve_full(domain_dimensions, lists, BC, f):
     nx = domain_dimensions[0] 
     ny = domain_dimensions[1]
     n = 10
-    mesh = RectangleMesh(200 * nx, 200 * ny, nx, ny)
+    mesh = RectangleMesh(100 * nx, 100 * ny, nx, ny)
     x = SpatialCoordinate(mesh)
 
     

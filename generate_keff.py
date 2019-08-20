@@ -9,9 +9,11 @@ from interpolate_keff import keff
 def generate_keff(data_name, mesh, radius, k, tau, c, vf, nonlinear):
     if nonlinear:
         length = 10 # set reasonable range of T values
+        limit = 1 # set highest T to consider
         lists = [ [] for _ in range(5) ] 
         out = File("Output/Psi.pvd")
-        for T in np.linspace(0, 1, length):
+        for T in np.linspace(0, limit, length):
+            warning("solving for T = %f" % T)
             eps = 1e-10
             T = 1. * (T + eps)
             Psi = solveCellProblem(mesh, radius, k, T, tau, c, vf, nonlinear)
