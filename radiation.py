@@ -23,7 +23,7 @@ radius = 0.25 # O(delta)
 k = 1. # problems arise for larger k 
 c = 1. # using c in place of lambda in thesis
 xi = 0.7; L = 8.; stb = 5.67e-8
-Tmin = 0#300 # K
+Tmin = 300 # K
 def vf(u):
     return 1/(2 * pi * u)
     #return 1/(4 * pi * u**2)
@@ -49,7 +49,7 @@ cell_mesh_size = cell_mesh.num_cells()
 warning("cell mesh size = %f" % cell_mesh_size)
 
 i = 0   
-for delta in [0.5, 0.125]:#, 0.125, 0.0625]:
+for delta in [0.5, 0.25, 0.125]:#, 0.0625]:
     warning("solving for delta = %f" % delta)
     delta_list.append(delta)
     direct_scale = delta# * 0.25

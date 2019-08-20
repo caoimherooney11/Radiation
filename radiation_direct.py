@@ -42,7 +42,7 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, VF, sca
     
     n = FacetNormal(mesh)
     radius = radius*delta
-    vf = VF(radius)
+    vf = Constant(VF(radius))
     #vf = 1. / (4 * pi * radius**2)
 
     if MMS:
@@ -57,7 +57,7 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, VF, sca
             bcs = None
             flux_bdys = ds(top_label) + ds(bottom_label) + ds(sides_label)
     else:
-        g = 1e-10
+        g = Constant(1e-10)
         if BC is "Dirichlet":
             bcs = [DirichletBC(V, Constant(1.0), top_label), DirichletBC(V, Constant(0.0), bottom_label)] 
             flux_bdys = ds(sides_label)
@@ -76,16 +76,15 @@ def solve_direct(mesh_name, domain_dimensions, k, delta, radius, tau, c, VF, sca
         for eps in eps_list:
             warning("solving for eps = %f" % eps)
             xx = Constant(eps * 4)
-            F = k * inner(grad(u), grad(v)) * dx - f(x[1]) * v * dx + g * v * flux_bdys
+            F = Constant(k) * inner(grad(u), grad(v)) * dx - f(x[1]) * v * dx + g * v * flux_bdys
             for i in range(num):
-                area = assemble(Constant(1) * ds(i+1, domain=mesh))
-                warning("tau**3 = %f" % tau**3)
+                area = Constant(assemble(Constant(1) * ds(i+1, domain=mesh)))
                 if MMS:
                     g1 = - k * inner(grad(uex), n) - (c/delta) * abs(uex + tau)**xx + (c/delta) * vf * assemble(abs(uex + tau)**xx * ds(i+1))
                 else:
                     g1 = Constant(1e-10)
-                F = F + ( (c/delta) * abs(u + tau)**xx - lam[i+1] + g1) * v * ds(i+1)\
-                        + ( lam[i+1]/area - (c/delta) * vf * abs(u + tau)**xx ) * mu[i+1] * ds(i+1) 
+                F = F + ( Constant(c/delta) * abs(u + Constant(tau))**xx - lam[i+1] + g1) * v * ds(i+1)\
+                        + ( lam[i+1]/area - Constant(c/delta) * vf * abs(u + Constant(tau))**xx ) * mu[i+1] * ds(i+1) 
         
             sp = {
                 "snes_monitor": None,
