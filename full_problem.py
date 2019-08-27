@@ -44,8 +44,9 @@ def solve_full(domain_dimensions, lists, BC, f):
         k_eff.vector().set_local(temp1)
         dk_eff.vector().set_local(temp2)
     
-        solve(J + F == 0, du, bcs, solver_parameters={"newton_solver":
-                                        {"relative_tolerance": 1e-6}})
+        solver_parameters = {"ksp_monitor": None, "ksp_type": "richardson", "pc_type": "lu", "pc_factor_mat_solver_type": "mumps"}
+        solve(J + F == 0, du, bcs, solver_parameters=solver_parameters)
+
         if BC is "Dirichlet":
             bcs = [DirichletBC(W, Constant(0.0), 4), DirichletBC(W, Constant(0.0), 3)] 
         uvec += du.vector()

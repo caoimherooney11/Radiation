@@ -9,13 +9,13 @@ import time
 
 nonlinear = True
 MMS = False
-calculate_error = True
+calculate_error = False
 generate_new_lists = True
-path = "HomogOutput/"
+path = "HomogOutput/Rerun"
 domain_scale = 0.5
 domain_dimensions = [domain_scale*1.0, domain_scale*1.0]
 cell_scale = 0.1 
-cell_mesh_name = "cell_mesh"
+cell_mesh_name = "cell_mesh_new"
 direct_mesh_name = "full_mesh"
 
 BC = "Dirichlet"
@@ -52,7 +52,7 @@ i = 0
 for delta in [0.5, 0.25, 0.125]:#, 0.0625]:
     warning("solving for delta = %f" % delta)
     delta_list.append(delta)
-    direct_scale = delta# * 0.25
+    direct_scale = delta * 0.25
 
     def RHS(u):
         return 1e-10#10**(3/8) * delta**(-3)
@@ -101,6 +101,7 @@ for delta in [0.5, 0.25, 0.125]:#, 0.0625]:
     homogenisation_times.append(homog_soln_time + cond_time)
     
     # solve direct problem
+    #import sys; sys.exit()
     direct_out = File(path + "direct_%d.pvd" %i)
     error_out = File(path + "error_%d.pvd" %i)
 
