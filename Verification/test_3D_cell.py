@@ -1,31 +1,34 @@
 from firedrake import *
-from firedrake.petsc import PETSc
 import numpy as np
-from math import pi
-from makCellMesh_new import makeCellMesh
-import time
-#from makePeriodicMesh import getPeriodicMesh
+from makCellMesh_new import makeCellMesh 
 
-mms = True
-periodic = True # periodic very slow
+path = "HomogOutput/3D/"
+mesh_name = "3D_mesh"
+cell_scale = 0.2
+global_scale = 0.5
+radius = 0.1
+k = 1.
+c = 1. # c in place of lambda
+xi = 0.7; L=8.; stb = 5.67e-8
+Tmin = 300
 dim = 3
-norms = []
+nonlinear = True
+
+def vf(u):
+    return 1/((2 * u)**(dim-1) * pi)
+
 mesh_size = []
 h = []
 times = []
-for i in range(2):
-    t1 = time.time()
-    mesh_name = "cell_mesh"
-    radius = 0.1
+for i in range(3):
     scale = 0.1
     global_scale = 2**(-i)
-    print(scale)
-    mesh = makeCellMesh(mesh_name, radius, scale, global_scale, dim, periodic)
+    mesh = makeCellMesh(mesh_name, radius, cell_scale, global_scale, dim, True)
     mesh_size.append(mesh.num_cells())
     h.append(mesh.num_cells()**(-1/3))
-    
-    V = VectorFunctionSpace(mesh, "CG", 1) 
-    #V = FunctionSpace(mesh, "CG", 1) 
+
+    #V = VectorFunctionSpace(mesh, "CG", 1) 
+    V = FunctionSpace(mesh, "CG", 1) 
     u = Function(V)
     v = TestFunction(V)
     n = FacetNormal(mesh)
@@ -39,8 +42,8 @@ for i in range(2):
     if mms:
         out = File("Output/mms_new.pvd")
         #uex = as_vector([cos(2 * pi * X[0]), cos(2 * pi * X[1]), cos(2 * pi * X[2])])
-        uex = as_vector([cos(2 * pi * X[0]), Constant(1.0), Constant(1.0)])
-        #uex = cos(2 * pi * X[0])
+        #uex = as_vector([cos(2 * pi * X[0]), Constant(1.0), Constant(1.0)])
+        uex = cos(2 * pi * X[0])
         out.write(u.interpolate(uex))
         u.assign(0)
         f = uex - div(grad(uex))
@@ -48,11 +51,11 @@ for i in range(2):
         #        - vf * as_vector([assemble((uex[0] + X[0]) * ds(1)), assemble((uex[1] + X[1]) * ds(1)), assemble((uex[2] + X[2]) * ds(1))]))
         g = dot(grad(uex), n)
 
-    F = (u[0] * v[0] + u[1] * v[1] + u[2] * v[2]) * dx \
-            + (inner(grad(u[0]), grad(v[0])) + inner(grad(u[1]), grad(v[1])) \
-                + inner(grad(u[2]), grad(v[2]))) * dx \
-            - inner(g, v) * ds(1) - inner(f, v) * dx 
-    #F = u * v * dx + inner(grad(u), grad(v)) * dx - g * v * ds(1) - f * v * dx
+    #F = (u[0] * v[0] + u[1] * v[1] + u[2] * v[2]) * dx \
+    #        + (inner(grad(u[0]), grad(v[0])) + inner(grad(u[1]), grad(v[1])) \
+    #            + inner(grad(u[2]), grad(v[2]))) * dx \
+    #        - inner(g, v) * ds(1) - inner(f, v) * dx 
+    F = u * v * dx + inner(grad(u), grad(v)) * dx - g * v * ds(1) - f * v * dx
     if not periodic:
         F = F - g * v * ds(2)
     
@@ -88,4 +91,8 @@ print("mesh size ratios: ", mesh_ratios)
 print("error: ", norms)
 print("error ratios: ", ratios)
 print("convergence rate: ", convergence)
-    
+
+
+
+
+
