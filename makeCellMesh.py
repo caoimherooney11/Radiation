@@ -1,7 +1,7 @@
 from firedrake import *
 from radiation_pythonToGeo import pythonToGeo
 from subprocess import call
-from glueplex import make_periodic_mesh
+from glueplex_new import make_periodic_mesh
 
 def makeCellMesh(mesh_name, radius, scale):
     pythonToGeo(mesh_name, radius, scale)

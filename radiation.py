@@ -1,6 +1,6 @@
 from firedrake import *
 import numpy as np
-from makeCellMesh import makeCellMesh
+from makeCellMesh_new import makeCellMesh
 from generate_keff import generate_keff
 import csv
 from radiation_direct import solve_direct
@@ -9,9 +9,9 @@ import time
 
 nonlinear = True
 MMS = False
-calculate_error = False
+calculate_error = True
 generate_new_lists = True
-path = "HomogOutput/Rerun"
+path = "NewOutput"
 domain_scale = 0.5
 domain_dimensions = [domain_scale*1.0, domain_scale*1.0]
 cell_scale = 0.1 
@@ -41,7 +41,11 @@ error_times = []
 
 warning("making cell mesh...")
 t0 = time.time()
-cell_mesh = makeCellMesh(cell_mesh_name, radius, cell_scale)
+#cell_mesh = makeCellMesh(cell_mesh_name, radius, cell_scale, )
+global_scale = 1.
+dim = 2
+periodic = True
+cell_mesh = makeCellMesh(cell_mesh_name, radius, cell_scale, global_scale, dim, periodic)
 t1 = time.time()
 cell_mesh_time = t1-t0
 warning("cell mesh made -- %f seconds" % cell_mesh_time)
