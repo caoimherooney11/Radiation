@@ -2,9 +2,9 @@ from firedrake import *
 import numpy as np
 from scipy import interpolate
 
-def keff(u, lists, entry=False, derivative=False):
+def keff(u, lists, Tmax, entry=False, derivative=False):
     
-    bbox = [-1e-6, 1+1e-6]
+    bbox = [-1e-6, Tmax+1e-6]
     if entry:
         temp = interpolate.InterpolatedUnivariateSpline(lists[0], lists[int(entry)], bbox=bbox)
         if derivative:

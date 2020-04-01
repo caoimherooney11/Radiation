@@ -4,7 +4,6 @@ import numpy as np
 from math import pi
 from makCellMesh_new import makeCellMesh
 import time
-#from makePeriodicMesh import getPeriodicMesh
 
 mms = True
 periodic = True # periodic very slow
@@ -48,7 +47,6 @@ for i in range(3):
         out = File("Output/mms_new.pvd")
         #uex = as_vector([cos(2 * pi * X[0]), cos(2 * pi * X[1]), cos(2 * pi * X[2])])
         uex = as_vector([cos(2 * pi * X[0]), Constant(1.0), Constant(1.0)])
-        #uex = cos(2 * pi * X[0])
         out.write(u_.interpolate(uex))
         u_.assign(0)
         f = uex - div(grad(uex))
@@ -67,7 +65,6 @@ for i in range(3):
             + (lam0/Constant(area) - Constant(vf) * (u[0] + X[0])) * mu0 * ds(1) \
             + (lam1/Constant(area) - Constant(vf) * (u[1] + X[1])) * mu1 * ds(1) \
             + (lam2/Constant(area) - Constant(vf) * (u[2] + X[2])) * mu2 * ds(1) 
-    #F = u * v * dx + inner(grad(u), grad(v)) * dx - g * v * ds(1) - f * v * dx
     if not periodic:
         F = F - g * v * ds(2)
     
