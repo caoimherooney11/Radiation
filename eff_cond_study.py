@@ -26,7 +26,7 @@ else:
     c = 1.
     Tmin = 300
     T_ = 10**(8/3) * delta**(-1/3)
-    tau = Tmin/T_
+    tau = 0.#Tmin/T_
     radius_list = [0.1, 0.2, 0.3, 0.4]
     path = "Output/BigDatasets/Plots/"
 
@@ -49,6 +49,7 @@ for radius in radius_list:
     mesh =  makeCellMesh(mesh_name, radius, cell_scale, global_scale, dim, True)
     warning("generating conductivity for R = %f" % radius)
     lists =  generate_keff(data_name, mesh, radius, k, tau, c, vf, nonlinear, dim, dimensional)
+    import IPython; IPython.embed()
     warning("anlaysis for R = %f complete" % radius)
     i = i+1
     import sys; sys.exit()

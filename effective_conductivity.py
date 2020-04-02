@@ -23,6 +23,7 @@ def effectiveConductivity(Psi, k, T, radius, tau, c, VF, nonlinear):
     for i in range(dim):
         for j in range(dim):
             rad_integral[i,j] = alpha * assemble(X[i] * G(Psi[j] + X[j]) * ds(1, domain=mesh)) / area
-            cond_integral[i,j] = k * assemble((Identity(2)[i,j] + grad(Psi)[i,j]) * dx) / area
+            #cond_integral[i,j] = k * assemble((Identity(2)[i,j] + grad(Psi)[i,j]) * dx) / area
+            cond_integral[i,j] = assemble((Identity(2)[i,j] + grad(Psi)[i,j]) * dx) / area
 
     return (rad_integral, cond_integral)    

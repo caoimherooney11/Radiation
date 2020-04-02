@@ -11,6 +11,7 @@ def generate_keff(data_name, mesh, radius, k, tau, c, vf, nonlinear, dim, dimens
         length = 10 # set reasonable range of T values
         if dimensional:
             limit = 6500 # set highest T to consider (K)
+            #limit = 4 # set highest T to consider (K)
         else:
             limit = 4 # set highest T to consider
         lists = [ [] for _ in range(5) ] 
